@@ -11,3 +11,4 @@ val uiModule = module {
     // Single - так как контроллер должен жить, пока живет приложение
     single { MusicControllerImpl(androidContext()) }
 }
+
