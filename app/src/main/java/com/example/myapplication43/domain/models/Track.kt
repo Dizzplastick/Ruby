@@ -1,11 +1,11 @@
 package com.example.myapplication43.domain.models
 
 data class Track(
-    val id: Int,
+    val id: String,
     val title: String,
     val artist: String,
-    val mediaUrl: String, // link 4 track
-    val coverUrl: String, // picture 4 track
+    val mediaUri: String, // link 4 track
+    val coverUri: String, // picture 4 track
     val isLiked: Boolean,
 
 

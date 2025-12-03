@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class GetHomeTracksUseCase(private val repository: MusicRepository) {
     operator fun invoke(): Flow<List<Track>> {
-        return repository.getTraks()
+        return repository.getTracks()
     }
 
 

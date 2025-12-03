@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
 
-    fun getTraks(): Flow<List<Track>>
+    fun getTracks(): Flow<List<Track>>
 
-    fun searchTrack(query: String): Flow<List<Track>>
+    fun searchTracks(query: String): Flow<List<Track>>
 
-    fun toggleLike(trackId: String , isLiked: Boolean)
+    suspend fun toggleLike (trackId: String , isLiked: Boolean)
 
 }
