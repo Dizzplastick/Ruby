@@ -1,9 +1,9 @@
 package com.example.myapplication43.di
 
 import com.example.myapplication43.data.repository.FirebaseMusicRepositoryImpl
-import com.example.myapplication43.data.repository.MockMusicRepositoryImpl
 import com.example.myapplication43.domain.repository.MusicRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import org.koin.dsl.module
 
 // Это переменная, в которой хранится "инструкция" для Koin
@@ -15,12 +15,14 @@ val dataModule = module {
     // В фигурных скобках { ... } мы создаем РЕАЛИЗАЦИЮ (что дать).
 // 1. Провайдим сам инстанс Firestore
     single { FirebaseFirestore.getInstance() }
+    single { FirebaseStorage.getInstance() } // <-- Добавляем Storage
 
     // 2. ПОДМЕНА! Используем Firebase реализацию
     // Было: single<MusicRepository> { MockMusicRepositoryImpl() }
 
     // Стало:
     single<MusicRepository> {
-        FirebaseMusicRepositoryImpl(db = get())
+        // Теперь передаем и db, и storage
+        FirebaseMusicRepositoryImpl(db = get(), storage = get())
     }
 }

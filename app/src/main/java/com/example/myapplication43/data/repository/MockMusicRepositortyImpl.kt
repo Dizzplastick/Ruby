@@ -1,5 +1,6 @@
 package com.example.myapplication43.data.repository
 
+import android.net.Uri
 import com.example.myapplication43.domain.models.Track
 import com.example.myapplication43.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
@@ -37,5 +38,14 @@ class MockMusicRepositoryImpl : MusicRepository {
 
     override suspend fun toggleLike(trackId: String, isLiked: Boolean) {
         // Пока пусто, или меняем локальный список в памяти
+    }
+
+    override suspend fun uploadTrack(
+        title: String,
+        artist: String,
+        coverUri: Uri,
+        audioUri: Uri
+    ): Boolean {
+        TODO("Not yet implemented")
     }
 }
