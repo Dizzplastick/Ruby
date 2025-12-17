@@ -23,7 +23,9 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 var isUserLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
                 if (isUserLoggedIn) {
-                    MainScreen()
+                    MainScreen(onLogout = {
+                        isUserLoggedIn = false
+                    })
                 } else {
                     // --- ЭКРАН ВХОДА ---
                     AuthScreen(onLoginSuccess = {

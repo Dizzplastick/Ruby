@@ -19,7 +19,7 @@ import com.example.myapplication43.presentation.ui.screens.ProfileScreen
 import com.example.myapplication43.presentation.ui.screens.UploadScreen
 
 @Composable
-fun MainScreen() {
+fun MainScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
 
     // Список экранов для нижней панели
@@ -71,8 +71,10 @@ fun MainScreen() {
         ) {
             composable(Screen.Home.route) { HomeScreen() }
             composable(Screen.Upload.route) { UploadScreen() }
-            composable(Screen.Profile.route) { ProfileScreen() }
-
+            // ПЕРЕДАЕМ onLogout В ПРОФИЛЬ
+            composable(Screen.Profile.route) {
+                ProfileScreen(onLogout = onLogout)
+            }
             // ДОБАВЛЯЕМ МАРШРУТ ПЛЕЕРА
             composable(Screen.Player.route) {
                 PlayerScreen()

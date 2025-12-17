@@ -115,4 +115,25 @@ class FirebaseMusicRepositoryImpl(
             }
         awaitClose { listener.remove() }
     }
+
+    override suspend fun uploadAvatar(uid: String, uri: Uri): String {
+        return try {
+            // Сохраняем аватарки в папку avatars/uid.jpg
+            val storageRef = storage.reference.child("avatars/$uid.jpg")
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
+    }
+
+    override suspend fun updateUser(user: User) {
+        try {
+            // Перезаписываем данные пользователя
+            db.collection("users").document(user.id).set(user).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

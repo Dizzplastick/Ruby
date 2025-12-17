@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import android.net.Uri
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val repository: MusicRepository
@@ -20,6 +22,9 @@ class ProfileViewModel(
 
     private val _userTracks = MutableStateFlow<List<Track>>(emptyList())
     val userTracks = _userTracks.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
     init {
         loadProfileData()
@@ -37,5 +42,39 @@ class ProfileViewModel(
         repository.getUserTracks(uid)
             .onEach { tracks -> _userTracks.value = tracks }
             .launchIn(viewModelScope)
+    }
+
+    // --- НОВЫЙ МЕТОД: Обновление профиля ---
+    fun updateProfile(newUsername: String, newAvatarUri: Uri?) {
+        val user = _currentUser.value ?: return
+
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            // 1. Если выбрали новую картинку - загружаем её, иначе берем старую ссылку
+            val finalAvatarUrl = if (newAvatarUri != null) {
+                repository.uploadAvatar(user.id, newAvatarUri)
+            } else {
+                user.avatarUrl
+            }
+
+            // 2. Создаем обновленный объект пользователя
+            val updatedUser = user.copy(
+                username = newUsername,
+                avatarUrl = finalAvatarUrl
+            )
+
+            // 3. Сохраняем в базу
+            repository.updateUser(updatedUser)
+
+            // (Данные сами обновятся на экране, так как мы слушаем getUserProfile)
+            _isLoading.value = false
+        }
+    }
+
+    // --- НОВЫЙ МЕТОД: Выход из аккаунта ---
+    fun logout() {
+        FirebaseAuth.getInstance().signOut()
+        // Навигация обрабатывается в UI через callback
     }
 }

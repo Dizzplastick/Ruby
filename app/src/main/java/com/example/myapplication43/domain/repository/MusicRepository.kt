@@ -18,4 +18,7 @@ interface MusicRepository {
     suspend fun saveUser(user: User) // Сохранить юзера при регистрации
     fun getUserProfile(userId: String): Flow<User?> // Получить данные профиля
     fun getUserTracks(userId: String): Flow<List<Track>> // Получить треки пользователя
+
+    suspend fun uploadAvatar(uid: String, uri: Uri): String
+    suspend fun updateUser(user: User)
 }
