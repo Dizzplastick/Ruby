@@ -1,7 +1,8 @@
 package com.example.myapplication43.di
 
 
-import com.example.myapplication43.presentation.PlayerViewModel
+import com.example.myapplication43.presentation.viewmodel.HomeViewModel
+import com.example.myapplication43.presentation.viewmodel.PlayerViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -18,4 +19,5 @@ val viewModelModule = module {
             musicController = get()
         )
     }
+    viewModel { HomeViewModel(get(), get()) }
 }

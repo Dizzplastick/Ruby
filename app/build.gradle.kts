@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -54,6 +55,7 @@ dependencies {
     // view model
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
     // koin
     implementation("io.insert-koin:koin-core:4.1.1")
     implementation("io.insert-koin:koin-android:4.1.1")
@@ -68,7 +70,18 @@ dependencies {
     // Icons (для кнопок плеера в UI)
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
+    // Coil
+    implementation("io.coil-kt:coil:2.6.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
+    //навигация
+    implementation("androidx.navigation:navigation-compose:2.7.6") // Проверь версию
+
+    // Иконки для меню
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+
+    //firebase
+    implementation("com.google.firebase:firebase-analytics")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
