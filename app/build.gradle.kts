@@ -61,6 +61,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:4.1.1")
     implementation("io.insert-koin:koin-androidx-compose:4.1.1")
 
+
     // Media3 (ExoPlayer)
     val media3Version = "1.2.0"
     implementation("androidx.media3:media3-exoplayer:$media3Version")
@@ -83,6 +84,8 @@ dependencies {
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
