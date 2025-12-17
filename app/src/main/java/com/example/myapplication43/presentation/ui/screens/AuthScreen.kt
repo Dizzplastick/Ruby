@@ -9,22 +9,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.google.firebase.auth.FirebaseAuth
+import com.example.myapplication43.presentation.viewmodel.AuthViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AuthScreen(onLoginSuccess: () -> Unit) {
-    // Получаем контекст и экземпляр Auth
+fun AuthScreen(
+    onLoginSuccess: () -> Unit,
+    viewModel: AuthViewModel = koinViewModel() // Инжектим ViewModel через Koin
+) {
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
 
-    // Состояние полей
+    // Состояния полей ввода
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") } // Новое поле для никнейма
 
-    // true = режим Входа, false = режим Регистрации
-    var isLoginMode by remember { mutableStateOf(true) }
-
-    // Крутилка загрузки
+    // Состояния режима экрана
+    var isLoginMode by remember { mutableStateOf(true) } // true = Вход, false = Регистрация
     var isLoading by remember { mutableStateOf(false) }
 
     Column(
@@ -35,64 +36,90 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = if (isLoginMode) "Вход в Ruby" else "Создание аккаунта",
+            text = if (isLoginMode) "Вход в Ruby" else "Регистрация",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Поле Email
+        // --- ПОЛЕ НИКНЕЙМА (Только при регистрации) ---
+        if (!isLoginMode) {
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Никнейм") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // --- ПОЛЕ EMAIL ---
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Поле Пароль
+        // --- ПОЛЕ ПАРОЛЯ ---
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Пароль") },
-            visualTransformation = PasswordVisualTransformation(), // Скрывает точки
-            modifier = Modifier.fillMaxWidth()
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // --- КНОПКА ДЕЙСТВИЯ ---
         if (isLoading) {
             CircularProgressIndicator()
         } else {
             Button(
                 onClick = {
-                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                    if (email.isNotBlank() && password.isNotBlank()) {
                         isLoading = true
 
                         if (isLoginMode) {
-                            // --- Логика ВХОДА ---
-                            auth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
+                            // Логика ВХОДА
+                            viewModel.loginUser(
+                                email = email,
+                                pass = password,
+                                onSuccess = {
                                     isLoading = false
-                                    if (task.isSuccessful) {
-                                        onLoginSuccess() // Сообщаем MainActivity, что всё ок
-                                    } else {
-                                        Toast.makeText(context, "Ошибка: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
-                                    }
+                                    onLoginSuccess()
+                                },
+                                onError = { errorMsg ->
+                                    isLoading = false
+                                    Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
                                 }
+                            )
                         } else {
-                            // --- Логика РЕГИСТРАЦИИ ---
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    isLoading = false
-                                    if (task.isSuccessful) {
-                                        // При успешной регистрации сразу пускаем внутрь
+                            // Логика РЕГИСТРАЦИИ
+                            if (username.isNotBlank()) {
+                                viewModel.registerUser(
+                                    email = email,
+                                    pass = password,
+                                    username = username,
+                                    onSuccess = {
+                                        isLoading = false
                                         onLoginSuccess()
-                                    } else {
-                                        Toast.makeText(context, "Ошибка: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+                                    },
+                                    onError = { errorMsg ->
+                                        isLoading = false
+                                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
                                     }
-                                }
+                                )
+                            } else {
+                                isLoading = false
+                                Toast.makeText(context, "Пожалуйста, укажите никнейм", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     } else {
                         Toast.makeText(context, "Заполните все поля", Toast.LENGTH_SHORT).show()
@@ -106,9 +133,9 @@ fun AuthScreen(onLoginSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Кнопка переключения режима
+        // --- ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА ---
         TextButton(onClick = { isLoginMode = !isLoginMode }) {
-            Text(if (isLoginMode) "Нет аккаунта? Регистрация" else "Уже есть аккаунт? Вход")
+            Text(if (isLoginMode) "Нет аккаунта? Создать" else "Уже есть аккаунт? Войти")
         }
     }
 }

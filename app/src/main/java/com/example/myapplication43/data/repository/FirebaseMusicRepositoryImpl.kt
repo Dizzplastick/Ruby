@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
+import com.google.firebase.auth.FirebaseAuth
+import com.example.myapplication43.domain.models.User
+
 
 class FirebaseMusicRepositoryImpl(
     private val db: FirebaseFirestore,
@@ -48,35 +51,68 @@ class FirebaseMusicRepositoryImpl(
     // --- НОВЫЙ МЕТОД ---
     override suspend fun uploadTrack(title: String, artist: String, coverUri: Uri, audioUri: Uri): Boolean {
         return try {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return false // Проверка
             val trackId = UUID.randomUUID().toString()
             val storageRef = storage.reference
 
-            // 1. Загружаем обложку
+            // Загрузка файлов... (как и было)
             val coverRef = storageRef.child("covers/$trackId.jpg")
             coverRef.putFile(coverUri).await()
             val downloadCoverUrl = coverRef.downloadUrl.await().toString()
 
-            // 2. Загружаем аудио
             val audioRef = storageRef.child("audio/$trackId.mp3")
             audioRef.putFile(audioUri).await()
             val downloadAudioUrl = audioRef.downloadUrl.await().toString()
 
-            // 3. Сохраняем данные в Firestore
+            // Сохраняем с userId
             val track = Track(
                 id = trackId,
                 title = title,
                 artist = artist,
                 mediaUri = downloadAudioUrl,
                 coverUri = downloadCoverUrl,
+                userId = currentUserId, // <--- ВАЖНО: Привязываем трек к юзеру
                 isLiked = false
             )
 
-            // Firebase сам преобразует объект Track в Map, если поля совпадают
             db.collection("tracks").document(trackId).set(track).await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
+    }
+
+    // --- НОВЫЕ МЕТОДЫ ---
+
+    override suspend fun saveUser(user: User) {
+        // Сохраняем данные пользователя в коллекцию "users"
+        try {
+            db.collection("users").document(user.id).set(user).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun getUserProfile(userId: String): Flow<User?> = callbackFlow {
+        val listener = db.collection("users").document(userId)
+            .addSnapshotListener { snapshot, _ ->
+                val user = snapshot?.toObject(User::class.java)
+                trySend(user)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    override fun getUserTracks(userId: String): Flow<List<Track>> = callbackFlow {
+        // Ищем треки, где поле userId совпадает с переданным
+        val listener = db.collection("tracks")
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshot, _ ->
+                val tracks = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Track::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+                trySend(tracks)
+            }
+        awaitClose { listener.remove() }
     }
 }
