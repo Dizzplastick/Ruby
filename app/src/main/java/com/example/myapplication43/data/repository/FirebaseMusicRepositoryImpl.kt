@@ -45,8 +45,40 @@ class FirebaseMusicRepositoryImpl(
     }
 
     override fun searchTracks(query: String): Flow<List<Track>> = callbackFlow {
-        // ... твой старый код ...
-        awaitClose { } // заглушка, чтобы компилировалось, если код был не полным
+        // Мы используем тот же слушатель, что и для всех треков, но фильтруем результат внутри
+        val listener = db.collection("tracks")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+
+                if (snapshot != null) {
+                    val allTracks = snapshot.documents.map { doc ->
+                        Track(
+                            id = doc.id,
+                            title = doc.getString("title") ?: "Unknown",
+                            artist = doc.getString("artist") ?: "Unknown",
+                            mediaUri = doc.getString("mediaUri") ?: "",
+                            coverUri = doc.getString("coverUri") ?: "",
+                            userId = doc.getString("userId") ?: "",
+                            username = doc.getString("username") ?: "",
+                            isLiked = false
+                        )
+                    }
+
+                    // --- ФИЛЬТРАЦИЯ ---
+                    // Если запрос пустой - возвращаем всё. Иначе ищем вхождение строки.
+                    val filteredList = if (query.isBlank()) {
+                        allTracks
+                    } else {
+                        allTracks.filter { track ->
+                            track.title.contains(query, ignoreCase = true) ||
+                                    track.artist.contains(query, ignoreCase = true)
+                        }
+                    }
+
+                    trySend(filteredList)
+                }
+            }
+        awaitClose { listener.remove() }
     }
 
     override suspend fun toggleLike(trackId: String, isLiked: Boolean) {}

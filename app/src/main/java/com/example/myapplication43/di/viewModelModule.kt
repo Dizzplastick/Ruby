@@ -9,6 +9,7 @@ import com.example.myapplication43.presentation.viewmodel.UploadViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
+
 val viewModelModule = module {
 
     // Объявляем нашу ViewModel
@@ -22,7 +23,7 @@ val viewModelModule = module {
             musicController = get()
         )
     }
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(),get(),  get()) }
 
     viewModel { UploadViewModel(get()) }
 
