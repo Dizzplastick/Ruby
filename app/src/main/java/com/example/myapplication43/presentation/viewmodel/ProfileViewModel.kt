@@ -12,9 +12,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import android.net.Uri
 import kotlinx.coroutines.launch
+import com.example.myapplication43.presentation.player.MusicControllerImpl
+import com.example.myapplication43.presentation.toMediaItem
 
 class ProfileViewModel(
-    private val repository: MusicRepository
+    private val repository: MusicRepository,
+    private val musicController: MusicControllerImpl,
 ) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -59,7 +62,16 @@ class ProfileViewModel(
         return userIdArg == "me" || userIdArg == currentUid
     }
 
+    fun onTrackClick(track: Track, currentList: List<Track>) {
+        // 1. Превращаем список треков (UserTracks или LikedTracks) в список для плеера
+        val mediaItems = currentList.map { it.toMediaItem() }
 
+        // 2. Ищем позицию нажатого трека
+        val startIndex = currentList.indexOf(track).takeIf { it != -1 } ?: 0
+
+        // 3. Отдаем команду контроллеру
+        musicController.playTrackList(mediaItems, startIndex)
+    }
 
     private fun loadProfileData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -97,6 +109,11 @@ class ProfileViewModel(
             repository.updateUser(updatedUser)
             _isLoading.value = false
         }
+    }
+
+    fun onSeek(position: Float) {
+        // Slider возвращает Float, а плееру нужен Long
+        musicController.seekTo(position.toLong())
     }
 
     fun logout() {

@@ -50,6 +50,11 @@ class PlayerViewModel(
         }
     }
 
+    fun onSeek(position: Float) {
+        // Slider отдает Float, а плеер хочет Long
+        musicController.seekTo(position.toLong())
+    }
+
     fun skipToNext() {
         musicController.skipToNext()
     }

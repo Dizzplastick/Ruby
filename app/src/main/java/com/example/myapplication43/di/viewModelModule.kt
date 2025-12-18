@@ -30,5 +30,6 @@ val viewModelModule = module {
 
     viewModel { AuthViewModel(get()) }
 
-    viewModel { ProfileViewModel(get()) }
+    viewModel { ProfileViewModel(get(),
+        musicController = get()) }
 }

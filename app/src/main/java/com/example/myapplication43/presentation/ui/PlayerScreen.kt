@@ -75,9 +75,42 @@ fun PlayerScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // --- 4. ПРОГРЕСС БАР (НОВОЕ) ---
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            Slider(
+                value = state.currentPosition.toFloat(),
+                onValueChange = { newPos -> viewModel.onSeek(newPos) },
+                valueRange = 0f..state.totalDuration.toFloat().coerceAtLeast(1f), // Защита от 0
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+
+            // Время: Текущее --- Всего
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = formatTime(state.currentPosition),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = formatTime(state.totalDuration),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // 3. Кнопки управления (Row)
         Row(
@@ -125,4 +158,12 @@ fun PlayerScreen(
             }
         }
     }
+}
+
+private fun formatTime(ms: Long): String {
+    if (ms <= 0) return "00:00"
+    val totalSeconds = ms / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format("%02d:%02d", minutes, seconds)
 }

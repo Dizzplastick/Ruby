@@ -223,7 +223,7 @@ fun ProfileScreen(
                     items(tracksToShow) { track ->
                         TrackItem(
                             track = track,
-                            onClick = { /* TODO: Подключить логику воспроизведения через PlayerViewModel */ },
+                            onClick = { viewModel.onTrackClick(track, tracksToShow) },
                             onAuthorClick = {
                                 // В профиле игнорируем клик по автору
                             }

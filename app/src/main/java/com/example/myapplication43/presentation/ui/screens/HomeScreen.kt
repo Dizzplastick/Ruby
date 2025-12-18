@@ -49,7 +49,7 @@ fun HomeScreen(
             // Заголовок
             item {
                 Text(
-                    text = "Недавно добавленные",
+                    text = "Новинки для тебя",
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )

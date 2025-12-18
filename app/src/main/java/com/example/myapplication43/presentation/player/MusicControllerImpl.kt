@@ -11,14 +11,17 @@ import com.example.myapplication43.domain.models.Track
 import com.example.myapplication43.presentation.viewmodel.PlayerUiState
 import com.example.myapplication43.service.MusicService // Твой сервис
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 
 class MusicControllerImpl(context: Context) {
 
     private var mediaControllerFuture: ListenableFuture<MediaController>
+    // 1. Создаем Scope для запуска таймера
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     // Безопасное получение контроллера
     private val mediaController: MediaController?
@@ -53,7 +56,9 @@ class MusicControllerImpl(context: Context) {
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
-            // Тут будем ловить окончание трека или буферизацию
+            val controller = mediaController ?: return
+            if (playbackState == Player.STATE_READY) {
+                updateState { it.copy(totalDuration = controller.duration.coerceAtLeast(0L)) }}
         }
     }
 
@@ -75,8 +80,36 @@ class MusicControllerImpl(context: Context) {
                 // Вручную дергаем обновление, чтобы UI узнал, что уже играет
                 playerListener.onMediaItemTransition(controller.currentMediaItem, Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED)
                 playerListener.onIsPlayingChanged(controller.isPlaying)
+                updateState { it.copy(totalDuration = controller.duration.coerceAtLeast(0L)) }
             }
         }, ContextCompat.getMainExecutor(context))
+
+        startProgressUpdate()
+    }
+
+    private fun startProgressUpdate() {
+        scope.launch {
+            while (isActive) {
+                val controller = mediaController
+                // Обновляем, только если плеер реально играет
+                if (controller != null && controller.isPlaying) {
+                    _playerState.update { state ->
+                        state.copy(
+                            currentPosition = controller.currentPosition,
+                            totalDuration = controller.duration.coerceAtLeast(0L)
+                        )
+                    }
+                }
+                delay(1000L) // Ждем 1 секунду
+            }
+        }
+    }
+
+    // --- НОВЫЙ МЕТОД: Перемотка ---
+    fun seekTo(position: Long) {
+        mediaController?.seekTo(position)
+        // Сразу обновляем UI, чтобы ползунок не прыгал назад
+        _playerState.update { it.copy(currentPosition = position) }
     }
 
     fun playTrackList(mediaItems: List<MediaItem>, startIndex: Int = 0) {
@@ -108,6 +141,7 @@ class MusicControllerImpl(context: Context) {
         // Обязательно освобождаем ресурсы
         mediaController?.removeListener(playerListener)
         MediaController.releaseFuture(mediaControllerFuture)
+        scope.cancel()
     }
 
     private fun updateState(function: (PlayerUiState) -> PlayerUiState) {
