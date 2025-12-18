@@ -6,12 +6,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.myapplication43.presentation.navigation.Screen
 import com.example.myapplication43.presentation.ui.components.MiniPlayer
 import com.example.myapplication43.presentation.ui.screens.HomeScreen
@@ -22,12 +22,7 @@ import com.example.myapplication43.presentation.ui.screens.UploadScreen
 fun MainScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
 
-    // Список экранов для нижней панели
-    val bottomNavItems = listOf(
-        Screen.Home,
-        Screen.Upload,
-        Screen.Profile
-    )
+
 
     Scaffold(
         bottomBar = {
@@ -39,27 +34,34 @@ fun MainScreen(onLogout: () -> Unit) {
                     }
                 )
 
-                // Стандартное нижнее меню
                 NavigationBar {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
+                    val currentRoute = navBackStackEntry?.destination?.route
 
-                    bottomNavItems.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon, contentDescription = null) },
-                            label = { Text(screen.title) },
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        )
-                    }
+                    // Главная
+                    NavigationBarItem(
+                        icon = { Icon(Screen.Home.icon, null) },
+                        label = { Text(Screen.Home.title) },
+                        selected = currentRoute == Screen.Home.route,
+                        onClick = { navController.navigate(Screen.Home.route) }
+                    )
+
+                    // Загрузка
+                    NavigationBarItem(
+                        icon = { Icon(Screen.Upload.icon, null) },
+                        label = { Text(Screen.Upload.title) },
+                        selected = currentRoute == Screen.Upload.route,
+                        onClick = { navController.navigate(Screen.Upload.route) }
+                    )
+
+                    // Профиль (кнопка меню всегда ведет в "me")
+                    val isProfileTab = currentRoute?.startsWith("profile") == true
+                    NavigationBarItem(
+                        icon = { Icon(Screen.Profile.icon, null) },
+                        label = { Text(Screen.Profile.title) },
+                        selected = isProfileTab,
+                        onClick = { navController.navigate(Screen.Profile.createRoute("me")) }
+                    )
                 }
             }
         }
@@ -69,11 +71,23 @@ fun MainScreen(onLogout: () -> Unit) {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
+            composable(Screen.Home.route) {
+                HomeScreen(
+                    onAuthorClick = { userId ->
+                        // Переход на профиль автора
+                        navController.navigate(Screen.Profile.createRoute(userId))
+                    }
+                )
+            }
             composable(Screen.Upload.route) { UploadScreen() }
             // ПЕРЕДАЕМ onLogout В ПРОФИЛЬ
-            composable(Screen.Profile.route) {
-                ProfileScreen(onLogout = onLogout)
+            composable(
+                route = Screen.Profile.route, // "profile/{userId}"
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: "me"
+                ProfileScreen(userId = userId, onLogout = onLogout)
+
             }
             // ДОБАВЛЯЕМ МАРШРУТ ПЛЕЕРА
             composable(Screen.Player.route) {

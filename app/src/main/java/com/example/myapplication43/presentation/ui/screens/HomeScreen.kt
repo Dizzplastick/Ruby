@@ -18,7 +18,8 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
+    onAuthorClick: (String) -> Unit
 ) {
     val tracks by viewModel.tracks.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -58,7 +59,8 @@ fun HomeScreen(
             items(tracks) { track ->
                 TrackItem(
                     track = track,
-                    onClick = { viewModel.onTrackClick(track) }
+                    onClick = { viewModel.onTrackClick(track) },
+                    onAuthorClick = { userId -> onAuthorClick(userId) } // <---
                 )
             }
         }

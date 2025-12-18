@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,8 @@ import com.example.myapplication43.domain.models.Track
 @Composable
 fun TrackItem(
     track: Track,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAuthorClick: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -56,6 +58,18 @@ fun TrackItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // --- Ссылка на автора ---
+        if (track.username.isNotEmpty()) {
+            Text(
+                text = "Загрузил: ${track.username}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .clickable { onAuthorClick(track.userId) } // <--- Переход
             )
         }
 

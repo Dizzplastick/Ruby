@@ -7,7 +7,6 @@ data class Track(
     val mediaUri: String = "",
     val coverUri: String = "",
     val userId: String = "",
+    val username: String = "", // <--- Добавили поле
     val isLiked: Boolean = false
-
-
 )

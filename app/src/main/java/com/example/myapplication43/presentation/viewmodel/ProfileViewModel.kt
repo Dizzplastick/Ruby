@@ -26,9 +26,31 @@ class ProfileViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    init {
-        loadProfileData()
+    fun loadProfileData(userIdArg: String) {
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+        // Если пришло "me", используем свой ID, иначе - переданный
+        val targetUid = if (userIdArg == "me") currentUid else userIdArg
+
+        if (targetUid == null) return
+
+        // 1. Загружаем инфо о юзере
+        repository.getUserProfile(targetUid)
+            .onEach { user -> _currentUser.value = user }
+            .launchIn(viewModelScope)
+
+        // 2. Загружаем его треки
+        repository.getUserTracks(targetUid)
+            .onEach { tracks -> _userTracks.value = tracks }
+            .launchIn(viewModelScope)
     }
+
+    // Проверка, мой ли это профиль (чтобы скрыть/показать кнопки редактирования)
+    fun isMyProfile(userIdArg: String): Boolean {
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+        return userIdArg == "me" || userIdArg == currentUid
+    }
+
+
 
     private fun loadProfileData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return

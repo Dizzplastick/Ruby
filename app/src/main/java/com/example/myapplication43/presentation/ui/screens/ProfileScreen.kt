@@ -30,9 +30,11 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileScreen(
+    userId: String,
     onLogout: () -> Unit, // <--- Добавили колбэк для выхода
     viewModel: ProfileViewModel = koinViewModel()
 ) {
+
     val user by viewModel.currentUser.collectAsState()
     val tracks by viewModel.userTracks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -43,8 +45,16 @@ fun ProfileScreen(
     var editedAvatarUri by remember { mutableStateOf<Uri?>(null) }
 
     // Пикер для выбора новой аватарки
-    val imageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        editedAvatarUri = uri
+    val imageLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            editedAvatarUri = uri
+
+
+
+        }
+
+    LaunchedEffect(userId) {
+        viewModel.loadProfileData(userId)
     }
 
     // При входе в режим редактирования заполняем поле текущим именем
@@ -84,7 +94,11 @@ fun ProfileScreen(
                             isEditing = false
                             editedAvatarUri = null
                         }) {
-                            Icon(Icons.Default.Save, contentDescription = "Save", tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                Icons.Default.Save,
+                                contentDescription = "Save",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 } else {
@@ -131,7 +145,12 @@ fun ProfileScreen(
                         modifier = avatarModifier.background(Color.Gray),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(64.dp))
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(64.dp)
+                        )
                     }
                 }
 
@@ -183,10 +202,19 @@ fun ProfileScreen(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.align(Alignment.Start)
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 LazyColumn {
                     items(tracks) { track ->
-                        TrackItem(track = track, onClick = {})
+                        TrackItem(
+                            track = track,
+                            onClick = { /* Тут логика воспроизведения */ },
+                            onAuthorClick = {
+                                // В профиле мы уже находимся на странице автора,
+                                // поэтому клик по имени можно игнорировать (пустая лямбда)
+                            }
+                        )
                     }
                 }
             }
