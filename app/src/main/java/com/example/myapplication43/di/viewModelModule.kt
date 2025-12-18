@@ -20,7 +20,8 @@ val viewModelModule = module {
             getHomeTracksUseCase = get(),
 
             // Koin найдет MusicControllerImpl в UiModule (который мы создали шагом ранее)
-            musicController = get()
+            musicController = get(),
+            repository = get()
         )
     }
     viewModel { HomeViewModel(get(),get(),  get()) }

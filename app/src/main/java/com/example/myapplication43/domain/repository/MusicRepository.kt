@@ -13,6 +13,10 @@ interface MusicRepository {
 
     suspend fun toggleLike (trackId: String , isLiked: Boolean)
 
+    fun getLikedTracks(userId: String): Flow<List<Track>>
+
+    suspend fun isTrackLiked(trackId: String): Boolean
+
     suspend fun uploadTrack(title: String, artist: String, coverUri: Uri, audioUri: Uri): Boolean
 
     suspend fun saveUser(user: User) // Сохранить юзера при регистрации

@@ -12,7 +12,7 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import com.google.firebase.auth.FirebaseAuth
 import com.example.myapplication43.domain.models.User
-
+import com.google.firebase.firestore.FieldValue
 
 class FirebaseMusicRepositoryImpl(
     private val db: FirebaseFirestore,
@@ -81,7 +81,70 @@ class FirebaseMusicRepositoryImpl(
         awaitClose { listener.remove() }
     }
 
-    override suspend fun toggleLike(trackId: String, isLiked: Boolean) {}
+    // 1. ПЕРЕКЛЮЧЕНИЕ ЛАЙКА
+    override suspend fun toggleLike(trackId: String, isLiked: Boolean) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val trackRef = db.collection("users").document(uid)
+            .collection("liked_tracks").document(trackId)
+
+        if (isLiked) {
+            // Если уже лайкнут -> удаляем (дизлайк)
+            trackRef.delete().await()
+        } else {
+            // Если не лайкнут -> нам нужно сохранить данные трека в "liked_tracks"
+            // Сначала получаем сам трек, чтобы скопировать его данные
+            val sourceTrackSnapshot = db.collection("tracks").document(trackId).get().await()
+            val trackData = sourceTrackSnapshot.data
+
+            if (trackData != null) {
+                // Добавляем поле timestamp, чтобы сортировать по дате добавления
+                val dataToSave = trackData.toMutableMap()
+                dataToSave["likedAt"] = FieldValue.serverTimestamp()
+                trackRef.set(dataToSave).await()
+            }
+        }
+    }
+
+    // 2. ПОЛУЧЕНИЕ ЛАЙКНУТЫХ ТРЕКОВ
+    // (Добавь этот метод в интерфейс MusicRepository, если его там нет)
+    override fun getLikedTracks(userId: String): Flow<List<Track>> = callbackFlow {
+        val listener = db.collection("users").document(userId)
+            .collection("liked_tracks")
+            .orderBy("likedAt", com.google.firebase.firestore.Query.Direction.DESCENDING) // Свежие сверху
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+
+                if (snapshot != null) {
+                    val tracks = snapshot.documents.map { doc ->
+                        Track(
+                            id = doc.id,
+                            title = doc.getString("title") ?: "",
+                            artist = doc.getString("artist") ?: "",
+                            mediaUri = doc.getString("mediaUri") ?: "",
+                            coverUri = doc.getString("coverUri") ?: "",
+                            userId = doc.getString("userId") ?: "",
+                            username = doc.getString("username") ?: "",
+                            isLiked = true // В этом списке они всегда лайкнуты
+                        )
+                    }
+                    trySend(tracks)
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun isTrackLiked(trackId: String): Boolean {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return false
+        try {
+            val doc = db.collection("users").document(uid)
+                .collection("liked_tracks").document(trackId)
+                .get().await()
+            return doc.exists() // Вернет true, если лайк есть
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
 
     // --- НОВЫЙ МЕТОД ---
     override suspend fun uploadTrack(

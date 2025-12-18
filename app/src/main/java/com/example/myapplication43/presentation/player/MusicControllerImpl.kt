@@ -113,4 +113,13 @@ class MusicControllerImpl(context: Context) {
     private fun updateState(function: (PlayerUiState) -> PlayerUiState) {
         _playerState.value = function(_playerState.value)
     }
+
+    fun setLikeState(isLiked: Boolean) {
+        val currentTrack = _playerState.value.currentTrack ?: return
+
+        // Мы берем текущее состояние и подменяем в нем трек на такой же, но с новым лайком
+        _playerState.value = _playerState.value.copy(
+            currentTrack = currentTrack.copy(isLiked = isLiked)
+        )
+    }
 }

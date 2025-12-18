@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.* // Используем Material Design 3
@@ -21,6 +23,7 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun PlayerScreen(
@@ -79,8 +82,13 @@ fun PlayerScreen(
         // 3. Кнопки управления (Row)
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(24.dp) // Расстояние между кнопками
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
         ) {
+
+
+
+
             // Кнопка Назад
             IconButton(onClick = { viewModel.skipToPrevious() }, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Prev", modifier = Modifier.fillMaxSize())
@@ -101,6 +109,19 @@ fun PlayerScreen(
             // Кнопка Вперед
             IconButton(onClick = { viewModel.skipToNext() }, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Next", modifier = Modifier.fillMaxSize())
+            }
+        }
+        // КНОПКА ЛАЙК (БОЛЬШАЯ)
+        if (track != null) {
+            IconButton(onClick = { viewModel.onLikeClick() }) {
+                Icon(
+                    // Та же логика: Favorite (полное) или FavoriteBorder (пустое)
+                    imageVector = if (track.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Like",
+                    // Цвет: Красный или обычный
+                    tint = if (track.isLiked) Color.Red else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     }

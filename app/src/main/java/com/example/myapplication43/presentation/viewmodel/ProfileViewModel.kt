@@ -23,8 +23,13 @@ class ProfileViewModel(
     private val _userTracks = MutableStateFlow<List<Track>>(emptyList())
     val userTracks = _userTracks.asStateFlow()
 
+    private val _likedTracks = MutableStateFlow<List<Track>>(emptyList())
+    val likedTracks = _likedTracks.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+
+
 
     // Метод загрузки данных по ID
     fun loadProfileData(userIdArg: String) {
@@ -43,6 +48,9 @@ class ProfileViewModel(
         repository.getUserTracks(targetUid)
             .onEach { tracks -> _userTracks.value = tracks }
             .launchIn(viewModelScope)
+
+        repository.getLikedTracks(targetUid).onEach { _likedTracks.value = it }.launchIn(viewModelScope)
+
     }
 
     // Проверка, мой ли это профиль (чтобы скрыть/показать кнопки редактирования)

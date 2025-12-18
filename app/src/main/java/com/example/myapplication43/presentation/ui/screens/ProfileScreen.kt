@@ -41,6 +41,8 @@ fun ProfileScreen(
     val user by viewModel.currentUser.collectAsState()
     val tracks by viewModel.userTracks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val uploadedTracks by viewModel.userTracks.collectAsState()
+    val likedTracks by viewModel.likedTracks.collectAsState()
 
     // ВАЖНО: Определяем, хозяин ли я
     val isMyProfile = remember(userId) { viewModel.isMyProfile(userId) }
@@ -54,12 +56,11 @@ fun ProfileScreen(
     val imageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             editedAvatarUri = uri
-
-
-
         }
 
-
+    //Вкладки (Tabs) 0 = Мои треки, 1 = Лайки
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Треки", "Любимое")
 
     // При входе в режим редактирования заполняем поле текущим именем
     LaunchedEffect(isEditing) {
@@ -125,6 +126,7 @@ fun ProfileScreen(
                     .size(120.dp)
                     .clip(CircleShape)
                     .let {
+                        // Кликабельно только в режиме редактирования
                         if (isEditing) it.clickable { imageLauncher.launch("image/*") } else it
                     }
 
@@ -200,24 +202,40 @@ fun ProfileScreen(
 
             // --- СПИСОК ТРЕКОВ ---
             if (!isEditing) {
-                Text(
-                    text = "Мои треки (${tracks.size})",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.align(Alignment.Start)
-                )
+                // 1. Рисуем вкладки
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // 2. Выбираем, какой список показывать
+                val tracksToShow = if (selectedTabIndex == 0) uploadedTracks else likedTracks
+
+                // 3. Отображаем список
                 LazyColumn {
-                    items(tracks) { track ->
+                    items(tracksToShow) { track ->
                         TrackItem(
                             track = track,
-                            onClick = { /* Тут логика воспроизведения */ },
+                            onClick = { /* TODO: Подключить логику воспроизведения через PlayerViewModel */ },
                             onAuthorClick = {
-                                // В профиле мы уже находимся на странице автора,
-                                // поэтому клик по имени можно игнорировать (пустая лямбда)
+                                // В профиле игнорируем клик по автору
                             }
                         )
+                    }
+
+                    if (tracksToShow.isEmpty()) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                                Text("Здесь пока пусто", color = Color.Gray)
+                            }
+                        }
                     }
                 }
             }

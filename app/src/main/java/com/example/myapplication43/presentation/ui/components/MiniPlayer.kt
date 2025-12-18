@@ -17,11 +17,15 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication43.presentation.viewmodel.PlayerViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 
 @Composable
 fun MiniPlayer(
     viewModel: PlayerViewModel = koinViewModel(),
-    onClick: () -> Unit // Лямбда для открытия полного плеера (потом реализуем)
+    onClick: () -> Unit ,// Лямбда для открытия полного плеера (потом реализуем)
+    onLikeClick: () -> Unit, // <--- Новый колбэк
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
     val track = state.currentTrack
@@ -77,6 +81,14 @@ fun MiniPlayer(
                 Icon(
                     imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                     contentDescription = "Play/Pause"
+                )
+            }
+            IconButton(onClick = onLikeClick) {
+                Icon(
+                    imageVector = if (track.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Like",
+                    // 2. МЕНЯЕМ ЦВЕТ: Если лайк есть -> Красный, иначе -> Цвет текста
+                    tint = if (track.isLiked) androidx.compose.ui.graphics.Color.Red else MaterialTheme.colorScheme.onSurface
                 )
             }
         }

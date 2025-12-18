@@ -17,10 +17,13 @@ import com.example.myapplication43.presentation.ui.components.MiniPlayer
 import com.example.myapplication43.presentation.ui.screens.HomeScreen
 import com.example.myapplication43.presentation.ui.screens.ProfileScreen
 import com.example.myapplication43.presentation.ui.screens.UploadScreen
+import com.example.myapplication43.presentation.viewmodel.PlayerViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
+    val playerViewModel: PlayerViewModel = koinViewModel()
 
 
 
@@ -31,6 +34,9 @@ fun MainScreen(onLogout: () -> Unit) {
                 MiniPlayer(
                     onClick = {
                         navController.navigate(Screen.Player.route)
+                    },
+                    onLikeClick = {
+                        playerViewModel.onLikeClick()
                     }
                 )
 
