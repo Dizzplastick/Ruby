@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.myapplication43.presentation.ui.components.TrackItem
 import com.example.myapplication43.presentation.viewmodel.HomeViewModel
+import com.example.myapplication43.ui.theme.RubyRed
+import com.example.myapplication43.ui.theme.White
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,9 +37,19 @@ fun HomeScreen(
             onActiveChange = {},
             placeholder = { Text("Поиск треков...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            colors = SearchBarDefaults.colors(
+                containerColor = RubyRed, // Красный фон
+                inputFieldColors = TextFieldDefaults.colors(
+                    focusedTextColor = White,
+                    unfocusedTextColor = White,
+                    focusedPlaceholderColor = White.copy(alpha = 0.6f),
+                    unfocusedPlaceholderColor = White.copy(alpha = 0.6f),
+                    focusedLeadingIconColor = White,
+                    unfocusedLeadingIconColor = White
+                )),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(3.dp)
         ) {
             // Тут могут быть подсказки поиска
         }

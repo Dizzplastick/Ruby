@@ -19,6 +19,8 @@ import com.example.myapplication43.presentation.viewmodel.PlayerViewModel
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import com.example.myapplication43.ui.theme.RubyRed
+import com.example.myapplication43.ui.theme.White
 
 @Composable
 fun MiniPlayer(
@@ -38,7 +40,8 @@ fun MiniPlayer(
             .fillMaxWidth()
             .height(64.dp)
             .clickable { onClick() }, // Весь бар кликабельный
-        color = MaterialTheme.colorScheme.surfaceVariant, // Немного темнее фона
+        color = RubyRed, // Красный фон
+        contentColor = White, // Автоматически делает текст белы // Немного темнее фона
         tonalElevation = 8.dp
     ) {
         Row(
@@ -88,7 +91,7 @@ fun MiniPlayer(
                     imageVector = if (track.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Like",
                     // 2. МЕНЯЕМ ЦВЕТ: Если лайк есть -> Красный, иначе -> Цвет текста
-                    tint = if (track.isLiked) androidx.compose.ui.graphics.Color.Red else MaterialTheme.colorScheme.onSurface
+                    tint = if (track.isLiked) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurface
                 )
             }
         }

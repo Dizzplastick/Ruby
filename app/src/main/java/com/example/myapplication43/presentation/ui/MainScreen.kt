@@ -40,34 +40,45 @@ fun MainScreen(onLogout: () -> Unit) {
                     }
                 )
 
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background, // Тёмный фон (DeepDark)
+                ) {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = navBackStackEntry?.destination?.route
 
-                    // Главная
-                    NavigationBarItem(
-                        icon = { Icon(Screen.Home.icon, null) },
-                        label = { Text(Screen.Home.title) },
-                        selected = currentRoute == Screen.Home.route,
-                        onClick = { navController.navigate(Screen.Home.route) }
-                    )
+                    // Список вкладок
+                    val items = listOf(Screen.Home, Screen.Upload, Screen.Profile)
 
-                    // Загрузка
-                    NavigationBarItem(
-                        icon = { Icon(Screen.Upload.icon, null) },
-                        label = { Text(Screen.Upload.title) },
-                        selected = currentRoute == Screen.Upload.route,
-                        onClick = { navController.navigate(Screen.Upload.route) }
-                    )
+                    items.forEach { screen ->
+                        // Проверка выделения (для профиля проверяем начало строки "profile")
+                        val isSelected = if (screen is Screen.Profile) {
+                            currentRoute?.startsWith("profile") == true
+                        } else {
+                            currentRoute == screen.route
+                        }
 
-                    // Профиль (кнопка меню всегда ведет в "me")
-                    val isProfileTab = currentRoute?.startsWith("profile") == true
-                    NavigationBarItem(
-                        icon = { Icon(Screen.Profile.icon, null) },
-                        label = { Text(Screen.Profile.title) },
-                        selected = isProfileTab,
-                        onClick = { navController.navigate(Screen.Profile.createRoute("me")) }
-                    )
+                        NavigationBarItem(
+                            icon = { Icon(screen.icon, null) },
+                            label = { Text(screen.title) },
+                            selected = isSelected,
+                            onClick = {
+                                // ИСПРАВЛЕНИЕ: Используем Screen.Profile напрямую для вызова createRoute
+                                val route = if (screen is Screen.Profile) {
+                                    Screen.Profile.createRoute("me")
+                                } else {
+                                    screen.route
+                                }
+                                navController.navigate(route)
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary, // RubyRed
+                                selectedTextColor = MaterialTheme.colorScheme.primary, // RubyRed
+                                indicatorColor = MaterialTheme.colorScheme.background, // Без овала вокруг иконки
+                                unselectedIconColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                                unselectedTextColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -75,7 +86,7 @@ fun MainScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(

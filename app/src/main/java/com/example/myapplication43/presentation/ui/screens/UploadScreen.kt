@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication43.presentation.viewmodel.UploadViewModel
+import com.example.myapplication43.ui.theme.RubyRed
+import com.example.myapplication43.ui.theme.White
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -121,7 +123,8 @@ fun UploadScreen(
                 onClick = { audioLauncher.launch("audio/*") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (audioUri != null) Color.Green else MaterialTheme.colorScheme.primary
+                    containerColor = if (audioUri != null) Color(0xFF2E7D32) else RubyRed, // Темно-зеленый или Красный
+                    contentColor = White
                 )
             ) {
                 Icon(Icons.Default.AudioFile, contentDescription = null)
@@ -135,7 +138,13 @@ fun UploadScreen(
             Button(
                 onClick = { viewModel.uploadTrack(title, artist, coverUri, audioUri) },
                 enabled = title.isNotEmpty() && artist.isNotEmpty() && coverUri != null && audioUri != null,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = RubyRed,
+                    contentColor = White,
+                    disabledContainerColor = RubyRed.copy(alpha = 0.4f),
+                    disabledContentColor = White.copy(alpha = 0.4f)
+                )
             ) {
                 Text("ЗАГРУЗИТЬ ТРЕК")
             }

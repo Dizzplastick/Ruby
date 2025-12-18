@@ -12,9 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = RubyRed,
+    background = DeepDark,
+    surface = DeepDark,
+    onPrimary = White,
+    onBackground = White,
+    onSurface = White,
+    surfaceVariant = RubyRed // Это закрасит миниплеер и поиск по умолчанию
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,9 +39,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun MyApplication43Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true, // Форсируем темную тему
+    dynamicColor: Boolean = false, // Отключаем динамические цвета Android 12+, чтобы видеть наш дизайн
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

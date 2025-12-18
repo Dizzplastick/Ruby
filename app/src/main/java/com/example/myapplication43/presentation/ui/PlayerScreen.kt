@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+
 
 @Composable
 fun PlayerScreen(
@@ -47,7 +49,7 @@ fun PlayerScreen(
         AsyncImage(
             model = state.currentTrack?.coverUri, // Ссылка на картинку
             contentDescription = "Cover",
-            modifier = Modifier.size(300.dp).clip(RoundedCornerShape(16.dp))// Размер 300x300
+            modifier = Modifier.size(340.dp).clip(RoundedCornerShape(9.dp))// Размер 300x300
         )
 
         Spacer(modifier = Modifier.height(16.dp)) // Отступ
@@ -62,7 +64,7 @@ fun PlayerScreen(
         if (track != null && track.username.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Uploaded by @${track.username}",
+                text = "Загрузил: @${track.username}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary, // Цвет ссылки
                 modifier = Modifier
@@ -110,27 +112,27 @@ fun PlayerScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // 3. Кнопки управления (Row)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp)
         ) {
 
 
 
 
             // Кнопка Назад
-            IconButton(onClick = { viewModel.skipToPrevious() }, modifier = Modifier.size(48.dp)) {
+            IconButton(onClick = { viewModel.skipToPrevious() }, modifier = Modifier.size(44.dp)) {
                 Icon(Icons.Default.SkipPrevious, contentDescription = "Prev", modifier = Modifier.fillMaxSize())
             }
 
             // Кнопка Play/Pause (Большая)
             FilledIconButton(
                 onClick = { viewModel.togglePlayPause() },
-                modifier = Modifier.size(72.dp)
+                modifier = Modifier.size(65.dp)
             ) {
                 Icon(
                     imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -140,7 +142,7 @@ fun PlayerScreen(
             }
 
             // Кнопка Вперед
-            IconButton(onClick = { viewModel.skipToNext() }, modifier = Modifier.size(48.dp)) {
+            IconButton(onClick = { viewModel.skipToNext() }, modifier = Modifier.size(44.dp)) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Next", modifier = Modifier.fillMaxSize())
             }
         }
@@ -152,7 +154,7 @@ fun PlayerScreen(
                     imageVector = if (track.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Like",
                     // Цвет: Красный или обычный
-                    tint = if (track.isLiked) Color.Red else MaterialTheme.colorScheme.onSurface,
+                    tint = if (track.isLiked) com.example.myapplication43.ui.theme.RubyRed else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(32.dp)
                 )
             }
