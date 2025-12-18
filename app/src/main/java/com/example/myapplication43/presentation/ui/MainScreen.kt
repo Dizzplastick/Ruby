@@ -91,7 +91,12 @@ fun MainScreen(onLogout: () -> Unit) {
             }
             // ДОБАВЛЯЕМ МАРШРУТ ПЛЕЕРА
             composable(Screen.Player.route) {
-                PlayerScreen()
+                PlayerScreen(
+                    onAuthorClick = { userId ->
+                        // Навигация на профиль человека
+                        navController.navigate(Screen.Profile.createRoute(userId))
+                    }
+                )
             }
         }
     }

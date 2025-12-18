@@ -1,11 +1,14 @@
 package com.example.myapplication43.presentation.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.* // Используем Material Design 3
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,11 +25,13 @@ import androidx.compose.ui.draw.clip
 @Composable
 fun PlayerScreen(
     // Koin сам найдет и подставит сюда нашу PlayerViewModel
-    viewModel: PlayerViewModel = koinViewModel()
+    viewModel: PlayerViewModel = koinViewModel(),
+    onAuthorClick: (String) -> Unit
 ) {
     // Эта строчка делает магию: как только во ViewModel изменятся данные,
     // переменная state обновится, и экран перерисуется САМ.
     val state by viewModel.uiState.collectAsState()
+    val track = state.currentTrack
 
     // Column - это столбик. Элементы идут сверху вниз.
     Column(
@@ -48,6 +53,26 @@ fun PlayerScreen(
         // 2. Текст
         Text(text = state.currentTrack?.title ?: "Not Playing", style = MaterialTheme.typography.headlineMedium)
         Text(text = state.currentTrack?.artist ?: "", style = MaterialTheme.typography.bodyLarge)
+
+        // --- 4. НОВОЕ: ИМЯ ЗАГРУЗИВШЕГО (АВТОР) ---
+        // Проверяем, есть ли имя автора, чтобы не показывать пустую строку
+        if (track != null && track.username.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Uploaded by @${track.username}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary, // Цвет ссылки
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable {
+                        // При клике вызываем переход на профиль
+                        onAuthorClick(track.userId)
+                    }
+                    .padding(4.dp) // Небольшой отступ для удобства нажатия
+            )
+        }
+
+        Spacer(modifier = Modifier.height(48.dp))
 
         Spacer(modifier = Modifier.height(32.dp))
 

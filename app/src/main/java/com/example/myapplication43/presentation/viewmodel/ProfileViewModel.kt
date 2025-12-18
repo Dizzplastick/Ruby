@@ -26,6 +26,7 @@ class ProfileViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    // Метод загрузки данных по ID
     fun loadProfileData(userIdArg: String) {
         val currentUid = FirebaseAuth.getInstance().currentUser?.uid
         // Если пришло "me", используем свой ID, иначе - переданный
@@ -67,36 +68,30 @@ class ProfileViewModel(
     }
 
     // --- НОВЫЙ МЕТОД: Обновление профиля ---
+    // 3. Обновление (только для своего профиля)
     fun updateProfile(newUsername: String, newAvatarUri: Uri?) {
         val user = _currentUser.value ?: return
+
+        // Доп. защита: если ID юзера в профиле не совпадает с текущим авторизованным -> выход
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (user.id != currentUid) return
 
         viewModelScope.launch {
             _isLoading.value = true
 
-            // 1. Если выбрали новую картинку - загружаем её, иначе берем старую ссылку
             val finalAvatarUrl = if (newAvatarUri != null) {
                 repository.uploadAvatar(user.id, newAvatarUri)
             } else {
                 user.avatarUrl
             }
 
-            // 2. Создаем обновленный объект пользователя
-            val updatedUser = user.copy(
-                username = newUsername,
-                avatarUrl = finalAvatarUrl
-            )
-
-            // 3. Сохраняем в базу
+            val updatedUser = user.copy(username = newUsername, avatarUrl = finalAvatarUrl)
             repository.updateUser(updatedUser)
-
-            // (Данные сами обновятся на экране, так как мы слушаем getUserProfile)
             _isLoading.value = false
         }
     }
 
-    // --- НОВЫЙ МЕТОД: Выход из аккаунта ---
     fun logout() {
         FirebaseAuth.getInstance().signOut()
-        // Навигация обрабатывается в UI через callback
     }
 }

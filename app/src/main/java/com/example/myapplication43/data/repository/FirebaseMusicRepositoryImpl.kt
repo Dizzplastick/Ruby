@@ -21,9 +21,9 @@ class FirebaseMusicRepositoryImpl(
 
     // ... твои существующие методы getTracks и searchTracks оставляем без изменений ...
     override fun getTracks(): Flow<List<Track>> = callbackFlow {
-        // ... твой старый код ...
         val listener = db.collection("tracks").addSnapshotListener { snapshot, error ->
-            // ... (оставь как было в файле) ...
+            if (error != null) { close(error); return@addSnapshotListener }
+
             if (snapshot != null) {
                 val tracks = snapshot.documents.map { doc ->
                     Track(
@@ -32,7 +32,10 @@ class FirebaseMusicRepositoryImpl(
                         artist = doc.getString("artist") ?: "Unknown",
                         mediaUri = doc.getString("mediaUri") ?: "",
                         coverUri = doc.getString("coverUri") ?: "",
-                        isLiked = false
+                        isLiked = false,
+                        // --- ВОТ ЭТИХ СТРОК СКОРЕЕ ВСЕГО НЕ ХВАТАЕТ: ---
+                        userId = doc.getString("userId") ?: "",
+                        username = doc.getString("username") ?: ""
                     )
                 }
                 trySend(tracks)

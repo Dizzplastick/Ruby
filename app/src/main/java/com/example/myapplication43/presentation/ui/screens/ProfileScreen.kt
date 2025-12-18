@@ -34,10 +34,16 @@ fun ProfileScreen(
     onLogout: () -> Unit, // <--- Добавили колбэк для выхода
     viewModel: ProfileViewModel = koinViewModel()
 ) {
+    LaunchedEffect(userId) {
+        viewModel.loadProfileData(userId)
+    }
 
     val user by viewModel.currentUser.collectAsState()
     val tracks by viewModel.userTracks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // ВАЖНО: Определяем, хозяин ли я
+    val isMyProfile = remember(userId) { viewModel.isMyProfile(userId) }
 
     // Состояния для режима редактирования
     var isEditing by remember { mutableStateOf(false) }
@@ -53,9 +59,7 @@ fun ProfileScreen(
 
         }
 
-    LaunchedEffect(userId) {
-        viewModel.loadProfileData(userId)
-    }
+
 
     // При входе в режим редактирования заполняем поле текущим именем
     LaunchedEffect(isEditing) {
@@ -74,36 +78,35 @@ fun ProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Кнопка ВЫХОД (слева или справа, как удобнее)
-                IconButton(onClick = {
-                    viewModel.logout()
-                    onLogout() // Сообщаем MainActivity, что мы вышли
-                }) {
-                    Icon(Icons.Default.ExitToApp, contentDescription = "Logout", tint = Color.Red)
-                }
-
-                // Кнопка РЕДАКТИРОВАТЬ / СОХРАНИТЬ
-                if (isEditing) {
-                    Row {
-                        // Отмена
-                        IconButton(onClick = { isEditing = false; editedAvatarUri = null }) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel")
-                        }
-                        // Сохранить
-                        IconButton(onClick = {
-                            viewModel.updateProfile(editedUsername, editedAvatarUri)
-                            isEditing = false
-                            editedAvatarUri = null
-                        }) {
-                            Icon(
-                                Icons.Default.Save,
-                                contentDescription = "Save",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                if (isMyProfile) {
+                    IconButton(onClick = { viewModel.logout(); onLogout() }) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout", tint = Color.Red)
                     }
                 } else {
-                    IconButton(onClick = { isEditing = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Spacer(modifier = Modifier.size(48.dp)) // Пустышка для отступа, если кнопки нет
+                }
+
+
+
+                // КНОПКИ РЕДАКТИРОВАНИЯ: Показываем ТОЛЬКО если isMyProfile
+                if (isMyProfile) {
+                    if (isEditing) {
+                        Row {
+                            // Кнопки Сохранить/Отмена...
+                            IconButton(onClick = { isEditing = false }) {
+                                Icon(Icons.Default.Close, contentDescription = "Cancel")
+                            }
+                            IconButton(onClick = {
+                                viewModel.updateProfile(editedUsername, editedAvatarUri)
+                                isEditing = false
+                            }) {
+                                Icon(Icons.Default.Save, contentDescription = "Save")
+                            }
+                        }
+                    } else {
+                        IconButton(onClick = { isEditing = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
                 }
             }

@@ -36,13 +36,17 @@ class MusicControllerImpl(context: Context) {
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             val track = mediaItem?.let {
+                // Достаем "рюкзак"
+                val extras = it.mediaMetadata.extras
                 Track(
                     id = it.mediaId,
                     title = it.mediaMetadata.title.toString(),
                     artist = it.mediaMetadata.artist.toString(),
                     mediaUri = "",
                     coverUri = it.mediaMetadata.artworkUri.toString(),
-                    isLiked = false
+                    isLiked = false,
+                    userId = extras?.getString("userId") ?: "",     // <--- ВОССТАНАВЛИВАЕМ
+                    username = extras?.getString("username") ?: ""  // <--- ВОССТАНАВЛИВАЕМ
                 )
             }
             updateState { it.copy(currentTrack = track) }
