@@ -49,7 +49,7 @@ fun PlayerScreen(
         AsyncImage(
             model = state.currentTrack?.coverUri, // Ссылка на картинку
             contentDescription = "Cover",
-            modifier = Modifier.size(340.dp).clip(RoundedCornerShape(9.dp))// Размер 300x300
+            modifier = Modifier.size(310.dp).clip(RoundedCornerShape(9.dp))// Размер 300x300
         )
 
         Spacer(modifier = Modifier.height(16.dp)) // Отступ
@@ -92,7 +92,7 @@ fun PlayerScreen(
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colorScheme.primary,
                     activeTrackColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                    inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.24f)
                 )
             )
 
