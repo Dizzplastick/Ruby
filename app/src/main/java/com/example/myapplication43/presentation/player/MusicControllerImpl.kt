@@ -20,10 +20,10 @@ import kotlinx.coroutines.flow.update
 class MusicControllerImpl(context: Context) {
 
     private var mediaControllerFuture: ListenableFuture<MediaController>
-    // 1. Создаем Scope для запуска таймера
+    //Создаем Scope для запуска таймера
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
-    // Безопасное получение контроллера
+    //Безопасное получение контроллера получит как будет готов
     private val mediaController: MediaController?
         get() = if (mediaControllerFuture.isDone && !mediaControllerFuture.isCancelled) {
             try { mediaControllerFuture.get() } catch (e: Exception) { null }
@@ -32,6 +32,7 @@ class MusicControllerImpl(context: Context) {
     private val _playerState = MutableStateFlow(PlayerUiState())
     val playerState = _playerState.asStateFlow()
 
+    //Player.Listener інтерфейс від бібліотеки Media3, слідкуємо за плей пауз для перемальовки ui
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             updateState { it.copy(isPlaying = isPlaying) }
@@ -39,7 +40,7 @@ class MusicControllerImpl(context: Context) {
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             val track = mediaItem?.let {
-                // Достаем "рюкзак"
+                // Достаем данніе exoPlayer
                 val extras = it.mediaMetadata.extras
                 Track(
                     id = it.mediaId,
@@ -48,8 +49,8 @@ class MusicControllerImpl(context: Context) {
                     mediaUri = "",
                     coverUri = it.mediaMetadata.artworkUri.toString(),
                     isLiked = false,
-                    userId = extras?.getString("userId") ?: "",     // <--- ВОССТАНАВЛИВАЕМ
-                    username = extras?.getString("username") ?: ""  // <--- ВОССТАНАВЛИВАЕМ
+                    userId = extras?.getString("userId") ?: "",
+                    username = extras?.getString("username") ?: ""
                 )
             }
             updateState { it.copy(currentTrack = track) }
@@ -61,7 +62,7 @@ class MusicControllerImpl(context: Context) {
                 updateState { it.copy(totalDuration = controller.duration.coerceAtLeast(0L)) }}
         }
     }
-
+        //соединяемся c MusicService
     init {
         val sessionToken = SessionToken(
             context,
@@ -70,12 +71,12 @@ class MusicControllerImpl(context: Context) {
 
         mediaControllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
 
-        // Используем ContextCompat.getMainExecutor для безопасности потоков
+        // полсе готовности mediaController подписіваемся на действия плеера
         mediaControllerFuture.addListener({
             val controller = mediaController ?: return@addListener
             controller.addListener(playerListener)
 
-            // Синхронизируем UI с текущим состоянием плеера при подключении
+            //Синхронизируем UI с текущим состоянием плеера при подключении
             if (controller.mediaItemCount > 0) {
                 // Вручную дергаем обновление, чтобы UI узнал, что уже играет
                 playerListener.onMediaItemTransition(controller.currentMediaItem, Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED)
@@ -91,7 +92,7 @@ class MusicControllerImpl(context: Context) {
         scope.launch {
             while (isActive) {
                 val controller = mediaController
-                // Обновляем, только если плеер реально играет
+                //только если плеер реально играет
                 if (controller != null && controller.isPlaying) {
                     _playerState.update { state ->
                         state.copy(
@@ -105,10 +106,10 @@ class MusicControllerImpl(context: Context) {
         }
     }
 
-    // --- НОВЫЙ МЕТОД: Перемотка ---
+    //Перемотка
     fun seekTo(position: Long) {
         mediaController?.seekTo(position)
-        // Сразу обновляем UI, чтобы ползунок не прыгал назад
+        //Сразу обновляем UI
         _playerState.update { it.copy(currentPosition = position) }
     }
 
@@ -120,7 +121,7 @@ class MusicControllerImpl(context: Context) {
         controller.play()
     }
 
-    // Добавим методы для переключения треков
+    //методы для переключения треков
     fun skipToNext() {
         mediaController?.seekToNext()
     }
@@ -138,7 +139,7 @@ class MusicControllerImpl(context: Context) {
     }
 
     fun release() {
-        // Обязательно освобождаем ресурсы
+        //освобождаем ресурсы
         mediaController?.removeListener(playerListener)
         MediaController.releaseFuture(mediaControllerFuture)
         scope.cancel()

@@ -35,7 +35,7 @@ fun HomeScreen(
             onSearch = { /* Пока не обрабатываем Enter */ },
             active = false, // Пока делаем просто как поле ввода, не расширяемое
             onActiveChange = {},
-            placeholder = { Text("Поиск треков...") },
+            placeholder = { Text("Search tracks") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             colors = SearchBarDefaults.colors(
                 containerColor = RubyRed, // Красный фон
@@ -61,7 +61,7 @@ fun HomeScreen(
             // Заголовок
             item {
                 Text(
-                    text = "Новинки для тебя",
+                    text = "Something new 4 u",
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )

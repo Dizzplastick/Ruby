@@ -15,17 +15,17 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AuthScreen(
     onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = koinViewModel() // Инжектим ViewModel через Koin
+    viewModel: AuthViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
 
     // Состояния полей ввода
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") } // Новое поле для никнейма
+    var username by remember { mutableStateOf("") }
 
-    // Состояния режима экрана
-    var isLoginMode by remember { mutableStateOf(true) } // true = Вход, false = Регистрация
+    //Состояния режима экрана
+    var isLoginMode by remember { mutableStateOf(true) } //true = вход false = регистрация
     var isLoading by remember { mutableStateOf(false) }
 
     Column(
@@ -36,25 +36,25 @@ fun AuthScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = if (isLoginMode) "Вход в Ruby" else "Регистрация",
+            text = if (isLoginMode) "Welcome 2 Ruby" else "Sign In",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- ПОЛЕ НИКНЕЙМА (Только при регистрации) ---
+        // ник
         if (!isLoginMode) {
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Никнейм") },
+                label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // --- ПОЛЕ EMAIL ---
+        //мейл
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -65,11 +65,11 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- ПОЛЕ ПАРОЛЯ ---
+        //Пасс
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Пароль") },
+            label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -77,7 +77,7 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- КНОПКА ДЕЙСТВИЯ ---
+        //кнопка
         if (isLoading) {
             CircularProgressIndicator()
         } else {
@@ -87,7 +87,7 @@ fun AuthScreen(
                         isLoading = true
 
                         if (isLoginMode) {
-                            // Логика ВХОДА
+                            // Логика взод
                             viewModel.loginUser(
                                 email = email,
                                 pass = password,
@@ -118,16 +118,16 @@ fun AuthScreen(
                                 )
                             } else {
                                 isLoading = false
-                                Toast.makeText(context, "Пожалуйста, укажите никнейм", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Please, entry ur username", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
-                        Toast.makeText(context, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Fill all blanks", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isLoginMode) "Войти" else "Зарегистрироваться")
+                Text(if (isLoginMode) "Log In" else "Sign In")
             }
         }
 
@@ -135,7 +135,7 @@ fun AuthScreen(
 
         // --- ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА ---
         TextButton(onClick = { isLoginMode = !isLoginMode }) {
-            Text(if (isLoginMode) "Нет аккаунта? Создать" else "Уже есть аккаунт? Войти")
+            Text(if (isLoginMode) "No account? Create" else "Have an account? Log in")
         }
     }
 }

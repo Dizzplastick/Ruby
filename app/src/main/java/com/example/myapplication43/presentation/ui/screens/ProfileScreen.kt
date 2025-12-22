@@ -60,7 +60,7 @@ fun ProfileScreen(
 
     //Вкладки (Tabs) 0 = Мои треки, 1 = Лайки
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Треки", "Любимое")
+    val tabs = listOf("Tracks", "Liked")
 
     // При входе в режим редактирования заполняем поле текущим именем
     LaunchedEffect(isEditing) {
@@ -182,12 +182,12 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = editedUsername,
                         onValueChange = { editedUsername = it },
-                        label = { Text("Никнейм") },
+                        label = { Text("Username") },
                         singleLine = true
                     )
                 } else {
                     Text(
-                        text = user?.username ?: "Без имени",
+                        text = user?.username ?: "No username",
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Text(
@@ -233,7 +233,7 @@ fun ProfileScreen(
                     if (tracksToShow.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                Text("Здесь пока пусто", color = Color.Gray)
+                                Text("Here is nothing yet", color = Color.Gray)
                             }
                         }
                     }

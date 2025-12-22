@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication43.domain.repository.MusicRepository
 import com.example.myapplication43.domain.useCase.GetHomeTracksUseCase
 import com.example.myapplication43.presentation.player.MusicControllerImpl
-import com.example.myapplication43.presentation.toMediaItem
+import com.example.myapplication43.data.toMediaItem
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

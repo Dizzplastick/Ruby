@@ -25,23 +25,23 @@ import com.example.myapplication43.ui.theme.White
 @Composable
 fun MiniPlayer(
     viewModel: PlayerViewModel = koinViewModel(),
-    onClick: () -> Unit ,// Лямбда для открытия полного плеера (потом реализуем)
-    onLikeClick: () -> Unit, // <--- Новый колбэк
+    onClick: () -> Unit ,
+    onLikeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
     val track = state.currentTrack
 
-    // Если трек не выбран — скрываем мини-плеер (возвращаем пустоту)
+    //трек не выбран возвращаем пустоту
     if (track == null) return
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
-            .clickable { onClick() }, // Весь бар кликабельный
-        color = RubyRed, // Красный фон
-        contentColor = White, // Автоматически делает текст белы // Немного темнее фона
+            .clickable { onClick() },
+        color = RubyRed,
+        contentColor = White,
         tonalElevation = 8.dp
     ) {
         Row(
@@ -50,7 +50,7 @@ fun MiniPlayer(
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Обложка
+            //Обложка
             AsyncImage(
                 model = track.coverUri,
                 contentDescription = "Mini Cover",
@@ -61,9 +61,9 @@ fun MiniPlayer(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // 2. Название и Артист
+            //Название и Артист
             Column(
-                modifier = Modifier.weight(1f) // Занимает всё свободное место
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = track.title,
@@ -79,7 +79,7 @@ fun MiniPlayer(
                 )
             }
 
-            // 3. Кнопка Play/Pause
+            //Кнопка Play/Pause
             IconButton(onClick = { viewModel.togglePlayPause() }) {
                 Icon(
                     imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -90,7 +90,6 @@ fun MiniPlayer(
                 Icon(
                     imageVector = if (track.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Like",
-                    // 2. МЕНЯЕМ ЦВЕТ: Если лайк есть -> Красный, иначе -> Цвет текста
                     tint = if (track.isLiked) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurface
                 )
             }

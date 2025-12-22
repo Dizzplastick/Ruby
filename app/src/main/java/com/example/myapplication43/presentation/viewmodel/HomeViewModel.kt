@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication43.domain.models.Track
 import com.example.myapplication43.domain.useCase.GetHomeTracksUseCase
 import com.example.myapplication43.domain.useCase.SearchTracksUseCase
-import com.example.myapplication43.presentation.toMediaItem
+import com.example.myapplication43.data.toMediaItem
 import com.example.myapplication43.presentation.player.MusicControllerImpl
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

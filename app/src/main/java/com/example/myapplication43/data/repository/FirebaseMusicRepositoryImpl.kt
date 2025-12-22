@@ -16,10 +16,9 @@ import com.google.firebase.firestore.FieldValue
 
 class FirebaseMusicRepositoryImpl(
     private val db: FirebaseFirestore,
-    private val storage: FirebaseStorage // <-- Добавили в конструктор
+    private val storage: FirebaseStorage
 ) : MusicRepository {
 
-    // ... твои существующие методы getTracks и searchTracks оставляем без изменений ...
     override fun getTracks(): Flow<List<Track>> = callbackFlow {
         val listener = db.collection("tracks").addSnapshotListener { snapshot, error ->
             if (error != null) { close(error); return@addSnapshotListener }
@@ -33,7 +32,6 @@ class FirebaseMusicRepositoryImpl(
                         mediaUri = doc.getString("mediaUri") ?: "",
                         coverUri = doc.getString("coverUri") ?: "",
                         isLiked = false,
-                        // --- ВОТ ЭТИХ СТРОК СКОРЕЕ ВСЕГО НЕ ХВАТАЕТ: ---
                         userId = doc.getString("userId") ?: "",
                         username = doc.getString("username") ?: ""
                     )
@@ -45,7 +43,7 @@ class FirebaseMusicRepositoryImpl(
     }
 
     override fun searchTracks(query: String): Flow<List<Track>> = callbackFlow {
-        // Мы используем тот же слушатель, что и для всех треков, но фильтруем результат внутри
+        // Мы юзаем тот же слуштель что и для всех треков и фльтруем
         val listener = db.collection("tracks")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) { close(error); return@addSnapshotListener }
@@ -64,8 +62,7 @@ class FirebaseMusicRepositoryImpl(
                         )
                     }
 
-                    // --- ФИЛЬТРАЦИЯ ---
-                    // Если запрос пустой - возвращаем всё. Иначе ищем вхождение строки.
+                    //фильтрация ( если поле пустое ,то список не меняетс)
                     val filteredList = if (query.isBlank()) {
                         allTracks
                     } else {
@@ -81,23 +78,22 @@ class FirebaseMusicRepositoryImpl(
         awaitClose { listener.remove() }
     }
 
-    // 1. ПЕРЕКЛЮЧЕНИЕ ЛАЙКА
+    //ПЕРЕКЛЮЧЕНИЕ ЛАЙКА
     override suspend fun toggleLike(trackId: String, isLiked: Boolean) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val trackRef = db.collection("users").document(uid)
             .collection("liked_tracks").document(trackId)
 
         if (isLiked) {
-            // Если уже лайкнут -> удаляем (дизлайк)
+            //Если уже лайкнут дизлай
             trackRef.delete().await()
         } else {
-            // Если не лайкнут -> нам нужно сохранить данные трека в "liked_tracks"
-            // Сначала получаем сам трек, чтобы скопировать его данные
+            //Если не лайкнут нужно сохранить данные трека в liked_tracks
             val sourceTrackSnapshot = db.collection("tracks").document(trackId).get().await()
             val trackData = sourceTrackSnapshot.data
 
             if (trackData != null) {
-                // Добавляем поле timestamp, чтобы сортировать по дате добавления
+                // добавляем поле timestamp, чтобы сортировать по дате добавления
                 val dataToSave = trackData.toMutableMap()
                 dataToSave["likedAt"] = FieldValue.serverTimestamp()
                 trackRef.set(dataToSave).await()
@@ -105,8 +101,7 @@ class FirebaseMusicRepositoryImpl(
         }
     }
 
-    // 2. ПОЛУЧЕНИЕ ЛАЙКНУТЫХ ТРЕКОВ
-    // (Добавь этот метод в интерфейс MusicRepository, если его там нет)
+    //ПОЛУЧЕНИЕ ЛАЙКНУТЫХ ТРЕКОВ
     override fun getLikedTracks(userId: String): Flow<List<Track>> = callbackFlow {
         val listener = db.collection("users").document(userId)
             .collection("liked_tracks")
@@ -146,7 +141,6 @@ class FirebaseMusicRepositoryImpl(
     }
 
 
-    // --- НОВЫЙ МЕТОД ---
     override suspend fun uploadTrack(
         title: String,
         artist: String,
@@ -156,14 +150,14 @@ class FirebaseMusicRepositoryImpl(
         return try {
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return false
 
-            // 1. Получаем текущий никнейм пользователя из базы
+            // 1. Получаем текущий никнейм юзера из базы
             val userSnapshot = db.collection("users").document(currentUserId).get().await()
             val currentUsername = userSnapshot.getString("username") ?: "Unknown"
 
             val trackId = UUID.randomUUID().toString()
             val storageRef = storage.reference
 
-            // 2. Загружаем файлы (как и было)
+            // 2. Загружаем файл
             val coverRef = storageRef.child("covers/$trackId.jpg")
             coverRef.putFile(coverUri).await()
             val downloadCoverUrl = coverRef.downloadUrl.await().toString()
@@ -172,7 +166,7 @@ class FirebaseMusicRepositoryImpl(
             audioRef.putFile(audioUri).await()
             val downloadAudioUrl = audioRef.downloadUrl.await().toString()
 
-            // 3. Создаем трек с ИМЕНЕМ АВТОРА (username)
+            // 3. Создаем трек
             val track = Track(
                 id = trackId,
                 title = title,
@@ -183,7 +177,7 @@ class FirebaseMusicRepositoryImpl(
                 username = currentUsername, // <--- Сохраняем никнейм
                 isLiked = false
             )
-
+                //Сохранение в бд
             db.collection("tracks").document(trackId).set(track).await()
             true
         } catch (e: Exception) {
@@ -193,10 +187,9 @@ class FirebaseMusicRepositoryImpl(
     }
 
 
-// --- НОВЫЕ МЕТОДЫ ---
 
 override suspend fun saveUser(user: User) {
-    // Сохраняем данные пользователя в коллекцию "users"
+    //Сохраняем данные пользователя в users
     try {
         db.collection("users").document(user.id).set(user).await()
     } catch (e: Exception) {
@@ -214,7 +207,7 @@ override fun getUserProfile(userId: String): Flow<User?> = callbackFlow {
 }
 
 override fun getUserTracks(userId: String): Flow<List<Track>> = callbackFlow {
-    // Ищем треки, где поле userId совпадает с переданным
+    // Ищем треки где поле userId совпадает с переданным
     val listener = db.collection("tracks")
         .whereEqualTo("userId", userId)
         .addSnapshotListener { snapshot, _ ->
@@ -228,7 +221,7 @@ override fun getUserTracks(userId: String): Flow<List<Track>> = callbackFlow {
 
 override suspend fun uploadAvatar(uid: String, uri: Uri): String {
     return try {
-        // Сохраняем аватарки в папку avatars/uid.jpg
+        // Сохраняем аватарки в папку avatars
         val storageRef = storage.reference.child("avatars/$uid.jpg")
         storageRef.putFile(uri).await()
         storageRef.downloadUrl.await().toString()
@@ -240,7 +233,7 @@ override suspend fun uploadAvatar(uid: String, uri: Uri): String {
 
 override suspend fun updateUser(user: User) {
     try {
-        // Перезаписываем данные пользователя
+        // Перезаливам даные пользователя
         db.collection("users").document(user.id).set(user).await()
     } catch (e: Exception) {
         e.printStackTrace()

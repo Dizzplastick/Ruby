@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import android.net.Uri
 import kotlinx.coroutines.launch
 import com.example.myapplication43.presentation.player.MusicControllerImpl
-import com.example.myapplication43.presentation.toMediaItem
+import com.example.myapplication43.data.toMediaItem
 
 class ProfileViewModel(
     private val repository: MusicRepository,

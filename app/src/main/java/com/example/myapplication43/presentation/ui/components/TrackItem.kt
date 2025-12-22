@@ -25,7 +25,7 @@ fun TrackItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() } // Обработка нажатия
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -43,7 +43,7 @@ fun TrackItem(
 
         // 2. Инфо
         Column(
-            modifier = Modifier.weight(1f) // Занимает всё доступное место
+            modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = track.title,
@@ -61,18 +61,17 @@ fun TrackItem(
             )
         }
 
-        // --- Ссылка на автора ---
+        //сылка на автор
         if (track.username.isNotEmpty()) {
             Text(
-                text = "Загрузил: ${track.username}",
+                text = "Uploaded by: ${track.username}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(top = 2.dp)
-                    .clickable { onAuthorClick(track.userId) } // <--- Переход
+                    .clickable { onAuthorClick(track.userId) }
             )
         }
 
-        // Тут можно будет добавить кнопку лайка справа
     }
 }

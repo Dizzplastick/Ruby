@@ -9,13 +9,13 @@ import org.koin.dsl.module
 
 val serviceModule = module {
 
-    // 1. Создаем ExoPlayer как Singleton
+    //Создаем ExoPlayer как синглтон
     single<ExoPlayer> {
         buildExoPlayer(androidContext())
     }
 }
 
-// Вспомогательная функция для настройки плеера
+//Вспомогательная функция для настройки плеера
 private fun buildExoPlayer(context: Context): ExoPlayer {
     return ExoPlayer.Builder(context)
         .setAudioAttributes(
@@ -23,8 +23,8 @@ private fun buildExoPlayer(context: Context): ExoPlayer {
                 .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_MEDIA)
                 .build(),
-            true // handleAudioFocus = true (ставить паузу, если позвонили)
+            true //ставить паузу, если позвонили)
         )
-        .setHandleAudioBecomingNoisy(true) // Пауза, если выдернули наушники
+        .setHandleAudioBecomingNoisy(true) // Пауз если выдернули наушники
         .build()
 }

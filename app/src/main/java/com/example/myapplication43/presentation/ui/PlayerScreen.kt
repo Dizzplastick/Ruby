@@ -64,7 +64,7 @@ fun PlayerScreen(
         if (track != null && track.username.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Загрузил: @${track.username}",
+                text = "Uploaded by: @${track.username}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary, // Цвет ссылки
                 modifier = Modifier

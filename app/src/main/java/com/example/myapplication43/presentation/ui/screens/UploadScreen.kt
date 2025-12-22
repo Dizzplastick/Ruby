@@ -52,7 +52,7 @@ fun UploadScreen(
     // Обработка результата загрузки
     LaunchedEffect(uploadSuccess) {
         if (uploadSuccess == true) {
-            Toast.makeText(context, "Трек успешно загружен!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Track successfully uploaded!", Toast.LENGTH_LONG).show()
             // Очистка полей
             title = ""
             artist = ""
@@ -60,7 +60,7 @@ fun UploadScreen(
             audioUri = null
             viewModel.resetState()
         } else if (uploadSuccess == false) {
-            Toast.makeText(context, "Ошибка загрузки", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Upload error", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -75,7 +75,7 @@ fun UploadScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Загрузка нового трека", style = MaterialTheme.typography.headlineMedium)
+            Text("Uploading a new track", style = MaterialTheme.typography.headlineMedium)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -95,7 +95,7 @@ fun UploadScreen(
                     Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(48.dp))
                 }
             }
-            Text("Нажми, чтобы выбрать обложку", style = MaterialTheme.typography.bodySmall)
+            Text("Press, to pick a cover", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -103,7 +103,7 @@ fun UploadScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Название трека") },
+                label = { Text("Name track") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -112,7 +112,7 @@ fun UploadScreen(
             OutlinedTextField(
                 value = artist,
                 onValueChange = { artist = it },
-                label = { Text("Исполнитель") },
+                label = { Text("Artist") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -129,7 +129,7 @@ fun UploadScreen(
             ) {
                 Icon(Icons.Default.AudioFile, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (audioUri != null) "Файл выбран" else "Выбрать MP3 файл")
+                Text(if (audioUri != null) "File selected" else "Select MP3 file")
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -146,7 +146,7 @@ fun UploadScreen(
                     disabledContentColor = White.copy(alpha = 0.4f)
                 )
             ) {
-                Text("ЗАГРУЗИТЬ ТРЕК")
+                Text("Upload Track")
             }
         }
     }

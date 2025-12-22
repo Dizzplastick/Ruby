@@ -6,21 +6,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import org.koin.dsl.module
 
-// Это переменная, в которой хранится "инструкция" для Koin
+
 val dataModule = module {
 
-    // single означает "Одиночка". Koin создаст этот объект ОДИН раз
-    // и будет отдавать его всем, кто попросит.
-    // В скобках <...> мы указываем ИНТЕРФЕЙС (что просят).
-    // В фигурных скобках { ... } мы создаем РЕАЛИЗАЦИЮ (что дать).
+
 // 1. Провайдим сам инстанс Firestore
     single { FirebaseFirestore.getInstance() }
-    single { FirebaseStorage.getInstance() } // <-- Добавляем Storage
+    single { FirebaseStorage.getInstance() }
 
-    // 2. ПОДМЕНА! Используем Firebase реализацию
-    // Было: single<MusicRepository> { MockMusicRepositoryImpl() }
 
-    // Стало:
     single<MusicRepository> {
         // Теперь передаем и db, и storage
         FirebaseMusicRepositoryImpl(db = get(), storage = get())

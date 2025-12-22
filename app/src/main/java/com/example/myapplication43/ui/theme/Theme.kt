@@ -18,7 +18,7 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = White,
     onBackground = White,
     onSurface = White,
-    surfaceVariant = RubyRed // Это закрасит миниплеер и поиск по умолчанию
+    surfaceVariant = RubyRed
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -26,21 +26,12 @@ private val LightColorScheme = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
 )
 
 @Composable
 fun MyApplication43Theme(
-    darkTheme: Boolean = true, // Форсируем темную тему
-    dynamicColor: Boolean = false, // Отключаем динамические цвета Android 12+, чтобы видеть наш дизайн
+    darkTheme: Boolean = true, // Форс темную тему
+    dynamicColor: Boolean = false, // Отключаем динамические цвета Android 12+ чтобы видеть наш дизайн
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
